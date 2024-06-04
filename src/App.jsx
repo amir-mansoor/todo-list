@@ -1,5 +1,5 @@
 import { Input } from "./components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -12,10 +12,14 @@ import {
 function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState("");
-  const [deleteTodos, setDeleteTodos] = useState([]);
+  const [editText, setEditText] = useState("");
+  const [selectTodos, setSelectTodos] = useState([]);
+  const [edit, setEdit] = useState(false);
 
   const handleForm = (e) => {
     e.preventDefault();
+    if (!text) return;
+
     const id = Math.floor(Math.random() * 1000000);
     let todo = {
       id,
@@ -27,28 +31,23 @@ function App() {
     setText("");
   };
 
-  const deleteTodo = (id) => {
-    deleteTodos.push(id);
-    const find = deleteTodos.find((delId) => delId === id);
-    console.log(find);
-    // if (include) {
-    //   setDeleteTodos(deleteTodos.filter((delId) => delId !== id));
-    // } else {
-    //   setDeleteTodos((prev) => [...prev, id]);
-    // }
+  const selectTodo = (id) => {
+    if (selectTodos.includes(id)) {
+      setSelectTodos(selectTodos.filter((todo) => todo !== id));
+    } else {
+      setSelectTodos([...selectTodos, id]);
+    }
+  };
 
-    console.log(deleteTodos);
+  const deleteTodos = () => {
+    setTodos(todos.filter((todo) => !selectTodos.includes(todo.id)));
+    setSelectTodos([]);
   };
 
   const changeMode = (id) => {
     const find = todos.find((todo) => todo.id === id);
     find.isCompleted = !find.isCompleted;
     setTodos((prev) => [...prev]);
-  };
-
-  const editTodo = (id) => {
-    const todo = todos.find((todo) => todo.id === id);
-    setText(todo.text);
   };
 
   return (
@@ -62,6 +61,14 @@ function App() {
         />
       </form>
 
+      {selectTodos.length > 0 && (
+        <button
+          onClick={() => deleteTodos()}
+          className="bg-red-600 mt-2 px-2 py-2 rounded bg-opacity-70 shadow-lg font-bold hover:bg-opacity-60"
+        >
+          Delete Selected Todos
+        </button>
+      )}
       <Table>
         <TableHeader>
           <TableRow className="">
@@ -84,7 +91,7 @@ function App() {
                 {todo.isCompleted ? "Yes" : "No"}{" "}
               </TableCell>
               <TableCell>
-                <input type="checkbox" onChange={() => deleteTodo(todo.id)} />
+                <input type="checkbox" onChange={() => selectTodo(todo.id)} />
               </TableCell>
               <TableCell>
                 <button
