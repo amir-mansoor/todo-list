@@ -12,13 +12,24 @@ import {
 function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState("");
-  const [editText, setEditText] = useState("");
+
   const [selectTodos, setSelectTodos] = useState([]);
   const [edit, setEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const handleForm = (e) => {
     e.preventDefault();
     if (!text) return;
+
+    if (edit) {
+      setTodos((prev) =>
+        prev.map((todo) => (todo.id === editId ? { ...todo, text } : todo))
+      );
+      setEdit(false);
+      setEditId(null);
+      setText("");
+      return;
+    }
 
     const id = Math.floor(Math.random() * 1000000);
     let todo = {
@@ -48,6 +59,13 @@ function App() {
     const find = todos.find((todo) => todo.id === id);
     find.isCompleted = !find.isCompleted;
     setTodos((prev) => [...prev]);
+  };
+
+  const editTodo = (id) => {
+    const editTodo = todos.find((todo) => todo.id === id);
+    setText(editTodo.text);
+    setEdit(true);
+    setEditId(id);
   };
 
   return (
@@ -88,7 +106,11 @@ function App() {
                 className="cursor-pointer"
                 onClick={() => changeMode(todo.id)}
               >
-                {todo.isCompleted ? "Yes" : "No"}{" "}
+                {todo.isCompleted ? (
+                  <span className="text-green-600">Yes</span>
+                ) : (
+                  <span className="text-red-600">No</span>
+                )}
               </TableCell>
               <TableCell>
                 <input type="checkbox" onChange={() => selectTodo(todo.id)} />
